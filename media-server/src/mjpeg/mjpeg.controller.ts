@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, Req, Res } from '@nestjs/common';
 import type { Response } from 'express';
 
 @Controller()
-export class AppController {
+export class MjpegController {
   private latestFrame: Buffer | null = null;
 
   private readonly clients = new Set<Response>();
