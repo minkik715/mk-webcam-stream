@@ -10,7 +10,10 @@ export const useWebcam = () => {
     const startWebcam = async () => {
       try {
         stream = await navigator.mediaDevices.getUserMedia({
-          video: true,
+          video: {
+            width: {ideal: 2560},
+            height: {ideal: 1440},
+          },
           audio: false,
         });
 
@@ -72,11 +75,11 @@ export const useWebcam = () => {
           }
 
           if(!stopped){
-            timer = setTimeout(canputreAndSend, 50);
+            timer = setTimeout(canputreAndSend, 100);
           }
         },
         'image/jpeg',
-        0.7
+        1.0
       );
     }
     canputreAndSend();

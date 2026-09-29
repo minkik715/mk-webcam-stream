@@ -1,27 +1,10 @@
 import './App.css'
-import { useWebcam } from './hooks/useWebcam'
+import { useH264Encoder } from './hooks/useH264Encoder'
 
 function App() {
-  const { videoRef, canvasRef, captureFrame } = useWebcam();
-  return (
-    <>
-      <h1>Webcam Stream</h1>
-
-      <video
-        ref={videoRef}
-        autoPlay
-        playsInline
-        muted
-        width={640}
-      />
-
-      <canvas
-        ref={canvasRef}
-      />
-
-      <button onClick={captureFrame}>Capture</button>
-    </>
-  )
+  
+  useH264Encoder();
+  return <></>
 }
 
 export default App
