@@ -1,10 +1,23 @@
 import './App.css'
-import { useH264Encoder } from './hooks/useH264Encoder'
+import { useWebcam } from './hooks/useWebcam';
+import { useH264Encoder } from './hooks/useH264Encoder';
 
 function App() {
   
-  useH264Encoder();
-  return <></>
+  const {videoRef} =  useWebcam();
+  
+  useH264Encoder(videoRef);
+
+  return <>
+    <video
+      ref={videoRef}
+      autoPlay
+      muted
+      playsInline
+      width={640}
+    />
+
+  </>
 }
 
 export default App

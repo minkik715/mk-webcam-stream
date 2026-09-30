@@ -1,28 +1,49 @@
-import { useEffect } from "react"
+import { useEffect, type RefObject } from "react";
 
-export const useH264Encoder = () => {
-    useEffect(() => {
-        console.log("videoEncoder supported:", "VideoEncoder" in window);
-        
-        const encoder = new VideoEncoder({
-            output: (chunk) => {
-                console.log("encoded chunk", chunk);
-            },
-            error: (error) => {
-                console.error("encoder error:", error);
-            }
-        })
+export const useH264Encoder = (
+  videoRef: RefObject<HTMLVideoElement | null>,
+) => {
 
-        encoder.configure({
-            codec: "avc1.42E01F",
-            width: 1280,
-            height: 720,
-            bitrate: 2_000_000,
-            framerate: 30
-        })
 
-        return () => {
-            encoder.close();
-        };
-    }, []);
-}
+  useEffect(() => {
+    if (!videoRef.current) return;
+    console.log("videoEncoder supported:", "VideoEncoder" in window);
+
+    const video = videoRef.current;
+    const encoder = new VideoEncoder({
+      output: (chunk, metadata) => {
+        console.log("encoded chunk", chunk);
+        console.log("metadata", metadata);
+      },
+      error: (error) => {
+        console.error("encoder error:", error);
+      },
+    });
+
+    encoder.configure({
+      codec: "avc1.42E01F",
+      width: 1280,
+      height: 720,
+      bitrate: 2_000_000,
+      framerate: 30,
+    });
+
+    const startEncoding = () => {
+        const encodeFrame = () => {
+            const frame = new VideoFrame(video);
+            encoder.encode(frame);
+            frame.close();
+
+            video.requestVideoFrameCallback(encodeFrame);
+        }
+
+        video.requestVideoFrameCallback(encodeFrame);
+    }
+
+    video.addEventListener("loadedmetadata", startEncoding);
+
+    return () => {
+      encoder.close();
+    };
+  }, [videoRef]);
+};
