@@ -1,4 +1,5 @@
 import { useEffect, type RefObject } from "react";
+import { websocket } from "../utils/websocket";
 
 export const useH264Encoder = (
   videoRef: RefObject<HTMLVideoElement | null>,
@@ -14,6 +15,17 @@ export const useH264Encoder = (
       output: (chunk, metadata) => {
         console.log("encoded chunk", chunk);
         console.log("metadata", metadata);
+
+        if (websocket.readyState !== WebSocket.OPEN){
+            return;
+        }
+
+        const data = new ArrayBuffer(chunk.byteLength);
+
+        chunk.copyTo(data);
+
+        websocket.send(data);
+
       },
       error: (error) => {
         console.error("encoder error:", error);
