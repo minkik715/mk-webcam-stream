@@ -1,5 +1,7 @@
+import { useWebcam } from "../hooks/useWebcam";
+
 const MjpgegVideo = () => {
-    const { videoRef, canvasRef, captureFrame } = useWebcam();
+    const { videoRef, /* canvasRef, captureFrame  */} = useWebcam();
     return (
       <>
         <h1>Webcam Stream</h1>
@@ -12,11 +14,11 @@ const MjpgegVideo = () => {
           width={640}
         />
   
-        <canvas
+        {/* <canvas
           ref={canvasRef}
         />
   
-        <button onClick={captureFrame}>Capture</button>
+        <button onClick={captureFrame}>Capture</button> */}
       </>
     )
 }
