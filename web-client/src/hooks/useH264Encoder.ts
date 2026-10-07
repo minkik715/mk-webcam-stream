@@ -1,13 +1,14 @@
 import { useEffect, type RefObject } from "react";
 import { websocket } from "../utils/websocket";
 
+const HEADER_SIZE = 13;
+
 export const useH264Encoder = (
   videoRef: RefObject<HTMLVideoElement | null>,
 ) => {
 
   useEffect(() => {
     if (!videoRef.current) return;
-    console.log("videoEncoder supported:", "VideoEncoder" in window);
 
     const video = videoRef.current;
     let initSent = false;
@@ -32,29 +33,18 @@ export const useH264Encoder = (
               description,
             }),
           );
-        
           initSent = true;
         }
-
-        const payload = new ArrayBuffer(chunk.byteLength);
-        chunk.copyTo(payload);
         
-        const packet = new ArrayBuffer(13 + chunk.byteLength);
+        const packet = new ArrayBuffer(HEADER_SIZE + chunk.byteLength);
         const view = new DataView(packet);
-        //type(1) + timestamp(8) + duration(4) + chunk
-        
-        //type
-        view.setUint8(0, chunk.type === "key" ? 1 : 0);
 
-        //timestamp
+        // type(1) + timestamp(8) + duration(4) + chunk
+        view.setUint8(0, chunk.type === 'key' ? 1 : 0);
         view.setBigUint64(1, BigInt(chunk.timestamp));
+        view.setUint32(9, chunk.duration ?? 0);
 
-        //duration
-        view.setInt32(9, chunk.duration ?? 0)
-
-        new Uint8Array(packet, 13).set(
-          new Uint8Array(payload)
-        )
+        chunk.copyTo(new Uint8Array(packet, HEADER_SIZE));
 
         websocket.send(packet);
 
