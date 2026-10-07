@@ -3,13 +3,13 @@ import {
   OnGatewayDisconnect,
   WebSocketGateway,
 } from '@nestjs/websockets';
-import type { RawData, WebSocket } from 'ws';
+import { RawData, WebSocket } from 'ws';
 
 @WebSocketGateway()
 export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  private viewers = new Set<WebSocket>();
   handleConnection(client: WebSocket) {
     console.log("websocket connected");
-  
     client.on("message", (data: RawData, isBinary: boolean) => {
       
       // INIT
@@ -22,16 +22,14 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
           const init = JSON.parse(message);
       
           if (init.type === "init") {
-            console.log("=== H.264 INIT ===");
-            console.log("codec:", init.codec);
-            console.log("width:", init.codedWidth);
-            console.log("height:", init.codedHeight);
-      
             const description = Buffer.from(init.description, "base64");
       
-            console.log("description size:", description.length);
-            console.log("description:", description);
           }
+
+          if (init.type === "subscribe"){
+              this.viewers.add(client)
+          }
+
         } catch (error) {
           console.error("Failed to parse JSON:", error);
         }
@@ -42,13 +40,17 @@ export class MediaGateway implements OnGatewayConnection, OnGatewayDisconnect {
       // MEDIA
       if (!Buffer.isBuffer(data)) return;
   
-      const buffer = data;
+      for (const viewer of this.viewers) {
+      if (viewer.readyState !== WebSocket.OPEN) continue;
+
+        viewer.send(data);
+      }
   
-      //console.log("H.264 chunk size:", buffer.length);
     });
   }
 
   handleDisconnect(client: WebSocket, reason?: string) {
+    this.viewers.delete(client);
     console.log(`Websocket disconnected : ${reason}`);
   }
 }
