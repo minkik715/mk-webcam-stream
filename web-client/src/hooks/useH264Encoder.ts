@@ -14,8 +14,6 @@ export const useH264Encoder = (
     let initSent = false;
     const encoder = new VideoEncoder({
       output: (chunk, metadata) => {
-        console.log("encoded chunk", chunk);
-        console.log("metadata", metadata);
 
         if (!initSent && metadata?.decoderConfig) {
           const config = metadata.decoderConfig;
